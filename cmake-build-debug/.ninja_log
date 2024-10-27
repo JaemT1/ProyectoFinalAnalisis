@@ -1,0 +1,14 @@
+# ninja log v6
+35	279	7517726777987100	PRoyectoFinal.exe	259d266df1e4fd62
+48	1141	7517607658966913	CMakeFiles/PRoyectoFinal.dir/src/cpp/algorithms/NaivOnArray.cpp.obj	3ad9f534eadf324d
+49	1260	7517725211051341	CMakeFiles/PRoyectoFinal.dir/src/cpp/algorithms/III3SequentialBlock.cpp.obj	a13ff633384cc146
+56	1446	7517725211123622	CMakeFiles/PRoyectoFinal.dir/src/cpp/algorithms/III4ParallelBlock.cpp.obj	a4524ffb16fb1d22
+4	454	7517727076479837	build.ninja	73b0a62bb6d3951
+70	1439	7517725211260627	CMakeFiles/PRoyectoFinal.dir/src/cpp/algorithms/IV4ParallelBlock.cpp.obj	9003995096a3e3bb
+35	2697	7517725210920355	CMakeFiles/PRoyectoFinal.dir/src/cpp/main.cpp.obj	cf1cc600c72aba59
+95	1960	7517607659431561	CMakeFiles/PRoyectoFinal.dir/src/cpp/algorithms/WinogradOriginal.cpp.obj	9037169444bcb4cc
+80	1936	7517607659276292	CMakeFiles/PRoyectoFinal.dir/src/cpp/algorithms/NaivLoopUnrollingFour.cpp.obj	c341ac83e5c2e109
+62	1983	7517607659104347	CMakeFiles/PRoyectoFinal.dir/src/cpp/algorithms/NaivLoopUnrolling2.cpp.obj	8a8df1568c53b4ea
+42	1265	7517725210986095	CMakeFiles/PRoyectoFinal.dir/src/cpp/algorithms/WinogradScaled.cpp.obj	7e98cb4b59972843
+63	1275	7517725211200660	CMakeFiles/PRoyectoFinal.dir/src/cpp/algorithms/IV3SequentialBlock.cpp.obj	1f39403fa5557fce
+77	1347	7517725211330885	CMakeFiles/PRoyectoFinal.dir/src/cpp/algorithms/IV5EnhancedParallelBlock.cpp.obj	623fdf8a57c14a71

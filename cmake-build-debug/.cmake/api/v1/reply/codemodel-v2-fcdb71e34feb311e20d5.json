@@ -1,0 +1,60 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"jsonFile" : "directory-.-Debug-d0094a50bb2071803777.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.29"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "PRoyectoFinal",
+					"targetIndexes" : 
+					[
+						0
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "PRoyectoFinal::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-PRoyectoFinal-Debug-1284d7cd48540c10979f.json",
+					"name" : "PRoyectoFinal",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "C:/Users/Juan Tunubala/Documents/UNIVERSIDAD/Octavo Semestre/An\u00e1lisis de Algoritmos/PRoyectoFinal/cmake-build-debug",
+		"source" : "C:/Users/Juan Tunubala/Documents/UNIVERSIDAD/Octavo Semestre/An\u00e1lisis de Algoritmos/PRoyectoFinal"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 7
+	}
+}

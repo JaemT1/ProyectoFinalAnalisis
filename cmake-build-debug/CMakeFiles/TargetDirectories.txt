@@ -1,0 +1,3 @@
+C:/Users/Juan Tunubala/Documents/UNIVERSIDAD/Octavo Semestre/Análisis de Algoritmos/PRoyectoFinal/cmake-build-debug/CMakeFiles/PRoyectoFinal.dir
+C:/Users/Juan Tunubala/Documents/UNIVERSIDAD/Octavo Semestre/Análisis de Algoritmos/PRoyectoFinal/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/Juan Tunubala/Documents/UNIVERSIDAD/Octavo Semestre/Análisis de Algoritmos/PRoyectoFinal/cmake-build-debug/CMakeFiles/rebuild_cache.dir
