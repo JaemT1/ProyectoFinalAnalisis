@@ -3,6 +3,6 @@ project(PRoyectoFinal)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(PRoyectoFinal src/cpp/main.cpp
+add_executable(PRoyectoFinal src/cpp/main.cpp)
+add_compile_definitions(PROJECT_ROOT="${CMAKE_SOURCE_DIR}")
 
-)

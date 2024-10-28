@@ -6,6 +6,7 @@
 #include <chrono>
 #include <string>
 #include <thread>
+#include <filesystem>
 
 using Matrix = std::vector<std::vector<int>>;
 using namespace std;
@@ -191,6 +192,9 @@ Matrix IV_5_EnhancedParallelBlock(const Matrix& A, const Matrix& B, int blockSiz
 
 //---------------------------------------Utils---------------------------------------
 void generarMatrizPrueba(int n, const std::string &nombreArchivo) {
+    // Crear el directorio para guardar las matrices de prueba si no existe
+    std::filesystem::create_directories("../src/data/test_cases");
+
     std::ofstream archivo(nombreArchivo);
     std::random_device rd;
     std::mt19937 gen(rd());
@@ -226,12 +230,55 @@ std::vector<std::vector<int>> cargarMatriz(const std::string &nombreArchivo, int
 
 
 void registrarTiempo(const std::string &algoritmo, int tamanoMatriz, double tiempo) {
-    std::ofstream archivo("resultados.csv", std::ios::app);
+    // Establecer la ruta relativa desde el directorio de trabajo actual
+    std::string ruta = "../src/data/results/resultadosC++.csv";
+
+    // Crear el directorio si no existe
+    std::filesystem::create_directories("../src/data/results");
+
+    // Intentar abrir el archivo en modo de agregar
+    std::ofstream archivo(ruta, std::ios::app);
     if (archivo.is_open()) {
         archivo << algoritmo << "," << tamanoMatriz << "," << tiempo << "\n";
         archivo.close();
     } else {
         std::cerr << "No se pudo abrir el archivo para registrar el tiempo de ejecución.\n";
+    }
+}
+
+void agregarEncabezadoSiEsNecesario(const std::string &ruta) {
+    // Comprobación de si el archivo ya contiene datos
+    std::ifstream archivoLectura(ruta);
+    bool archivoVacio = archivoLectura.peek() == std::ifstream::traits_type::eof();
+    archivoLectura.close();
+
+    // Si el archivo está vacío, agregamos el encabezado
+    if (archivoVacio) {
+        std::ofstream archivoEscritura(ruta);
+        if (archivoEscritura.is_open()) {
+            archivoEscritura << "Algoritmo,Tamaño,Tiempo(ms)\n";
+            archivoEscritura.close();
+        } else {
+            std::cerr << "No se pudo abrir el archivo para escribir el encabezado.\n";
+        }
+    }
+}
+
+void guardarResultadoEnArchivo(const std::vector<std::vector<int>> &matriz, const std::string &nombreArchivo) {
+    // Crear el directorio para los resultados de matrices si no existe
+    std::filesystem::create_directories("../src/data/results/matrices");
+
+    std::ofstream archivo(nombreArchivo);
+    if (archivo.is_open()) {
+        for (const auto &fila : matriz) {
+            for (const auto &valor : fila) {
+                archivo << valor << " ";
+            }
+            archivo << "\n";
+        }
+        archivo.close();
+    } else {
+        std::cerr << "No se pudo abrir el archivo para escribir el resultado de la matriz.\n";
     }
 }
 
@@ -253,15 +300,15 @@ void ejecutarAlgoritmo(const std::string &algoritmo, const std::string &archivoA
     } else if (algoritmo == "WinogradScaled") {
         resultado = WinogradScaled(A, B);
     } else if (algoritmo == "SequentialBlock") {
-        resultado = SequentialBlock(A, B, 16); // Ajusta el tamaño del bloque según sea necesario
+        resultado = SequentialBlock(A, B, 16);
     } else if (algoritmo == "ParallelBlock") {
-        resultado = ParallelBlock(A, B, 16); // Ajusta el tamaño del bloque según sea necesario
+        resultado = ParallelBlock(A, B, 16);
     } else if (algoritmo == "IV_3_SequentialBlock") {
-        resultado = IV_3_SequentialBlock(A, B, 16); // Ajusta el tamaño del bloque según sea necesario
+        resultado = IV_3_SequentialBlock(A, B, 16);
     } else if (algoritmo == "IV_4_ParallelBlock") {
-        resultado = IV_4_ParallelBlock(A, B, 16); // Ajusta el tamaño del bloque según sea necesario
+        resultado = IV_4_ParallelBlock(A, B, 16);
     } else if (algoritmo == "IV_5_EnhancedParallelBlock") {
-        resultado = IV_5_EnhancedParallelBlock(A, B, 16); // Ajusta el tamaño del bloque según sea necesario
+        resultado = IV_5_EnhancedParallelBlock(A, B, 16);
     } else {
         std::cerr << "Algoritmo no reconocido: " << algoritmo << std::endl;
         return;
@@ -271,22 +318,37 @@ void ejecutarAlgoritmo(const std::string &algoritmo, const std::string &archivoA
     std::chrono::duration<double, std::milli> tiempo = fin - inicio;
 
     registrarTiempo(algoritmo, n, tiempo.count());
+
+    // Generar el nombre del archivo de resultado
+    std::string nombreArchivoResultado = "../src/data/results/matrices/resultado_" + algoritmo + "_n" + std::to_string(n) + ".txt";
+    guardarResultadoEnArchivo(resultado, nombreArchivoResultado);
 }
 
-
-
-
 int main() {
-    const int n = 128; // Ajusta el tamaño de la matriz según lo necesites
-    const std::string archivoA = "matrizA128.txt"; // Nombre del archivo para la matriz A
-    const std::string archivoB = "matrizB128.txt"; // Nombre del archivo para la matriz B
+    const int n = 4;  // Tamaño de la matriz (ajustable)
+    const std::string archivoA = "../src/data/test_cases/matrizA4.txt";
+    const std::string archivoB = "../src/data/test_cases/matrizB4.txt";
+    std::string rutaCSV = "../src/data/results/resultadosC++.csv";
 
-    // Generar matrices de prueba (descomentar si es necesario)
-    generarMatrizPrueba(n, archivoA);
-    generarMatrizPrueba(n, archivoB);
+    // Generación de matrices de prueba si aún no existen
+    if (!std::ifstream(archivoA)) generarMatrizPrueba(n, archivoA);
+    if (!std::ifstream(archivoB)) generarMatrizPrueba(n, archivoB);
 
-    // Ejecución de todos los algoritmos
-    
+    // Agregar el encabezado si el archivo está vacío
+    agregarEncabezadoSiEsNecesario(rutaCSV);
 
+    // Ejecución de los algoritmos y medición de tiempo
+    ejecutarAlgoritmo("Naiv", archivoA, archivoB, n);
+    ejecutarAlgoritmo("LoopUnrollingTwo", archivoA, archivoB, n);
+    ejecutarAlgoritmo("LoopUnrollingFour", archivoA, archivoB, n);
+    ejecutarAlgoritmo("WinogradOriginal", archivoA, archivoB, n);
+    ejecutarAlgoritmo("WinogradScaled", archivoA, archivoB, n);
+    ejecutarAlgoritmo("SequentialBlock", archivoA, archivoB, n);
+    ejecutarAlgoritmo("ParallelBlock", archivoA, archivoB, n);
+    ejecutarAlgoritmo("IV_3_SequentialBlock", archivoA, archivoB, n);
+    ejecutarAlgoritmo("IV_4_ParallelBlock", archivoA, archivoB, n);
+    ejecutarAlgoritmo("IV_5_EnhancedParallelBlock", archivoA, archivoB, n);
+
+    std::cout << "Ejecución de algoritmos completada. Resultados guardados en resultados.csv\n";
     return 0;
 }

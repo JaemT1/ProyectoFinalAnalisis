@@ -50,6 +50,7 @@ cmake_ninja_workdir = C$:/Users/Juan$ Tunubala/Documents/UNIVERSIDAD/Octavo$ Sem
 build cmake_object_order_depends_target_PRoyectoFinal: phony || .
 
 build CMakeFiles/PRoyectoFinal.dir/src/cpp/main.cpp.obj: CXX_COMPILER__PRoyectoFinal_unscanned_Debug C$:/Users/Juan$ Tunubala/Documents/UNIVERSIDAD/Octavo$ Semestre/Análisis$ de$ Algoritmos/PRoyectoFinal/src/cpp/main.cpp || cmake_object_order_depends_target_PRoyectoFinal
+  DEFINES = -DPROJECT_ROOT="\"C:/Users/Juan Tunubala/Documents/UNIVERSIDAD/Octavo Semestre/Análisis de Algoritmos/PRoyectoFinal\""
   DEP_FILE = CMakeFiles\PRoyectoFinal.dir\src\cpp\main.cpp.obj.d
   FLAGS = -g -std=gnu++20 -fdiagnostics-color=always
   OBJECT_DIR = CMakeFiles\PRoyectoFinal.dir

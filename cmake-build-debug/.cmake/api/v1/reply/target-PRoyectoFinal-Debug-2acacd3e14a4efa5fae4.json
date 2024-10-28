@@ -13,7 +13,8 @@
 	{
 		"commands" : 
 		[
-			"add_executable"
+			"add_executable",
+			"add_compile_definitions"
 		],
 		"files" : 
 		[
@@ -29,6 +30,12 @@
 				"file" : 0,
 				"line" : 6,
 				"parent" : 0
+			},
+			{
+				"command" : 1,
+				"file" : 0,
+				"line" : 7,
+				"parent" : 0
 			}
 		]
 	},
@@ -39,6 +46,13 @@
 			[
 				{
 					"fragment" : "-g -std=gnu++20 -fdiagnostics-color=always"
+				}
+			],
+			"defines" : 
+			[
+				{
+					"backtrace" : 2,
+					"define" : "PROJECT_ROOT=\"C:/Users/Juan Tunubala/Documents/UNIVERSIDAD/Octavo Semestre/An\u00e1lisis de Algoritmos/PRoyectoFinal\""
 				}
 			],
 			"language" : "CXX",
