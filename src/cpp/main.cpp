@@ -7,16 +7,18 @@
 #include <string>
 #include <thread>
 #include <filesystem>
+#include <algorithm>
 
-using Matrix = std::vector<std::vector<int>>;
+using Matrix = std::vector<std::vector<long long>>;
 using namespace std;
 using namespace chrono;
 
 
 //---------------------------------------Algorithms---------------------------------------
 
-std::vector<std::vector<int>> multiplicacionNaiv(const std::vector<std::vector<int>> &A, const std::vector<std::vector<int>> &B, int n) {
-    std::vector<std::vector<int>> C(n, std::vector<int>(n, 0));
+
+Matrix multiplicacionNaiv(const Matrix &A, const Matrix &B, int n) {
+    Matrix C(n, std::vector<long long>(n, 0));
     for (int i = 0; i < n; ++i)
         for (int j = 0; j < n; ++j)
             for (int k = 0; k < n; ++k)
@@ -26,14 +28,14 @@ std::vector<std::vector<int>> multiplicacionNaiv(const std::vector<std::vector<i
 
 Matrix NaivLoopUnrollingTwo(const Matrix& A, const Matrix& B) {
     int n = A.size();
-    Matrix C(n, std::vector<int>(n, 0));
+    Matrix C(n, std::vector<long long>(n, 0));
     for (int i = 0; i < n; i++)
         for (int j = 0; j < n; j++) {
             for (int k = 0; k < n / 2 * 2; k += 2) {
                 C[i][j] += A[i][k] * B[k][j];
                 C[i][j] += A[i][k + 1] * B[k + 1][j];
             }
-            if (n % 2 != 0)  // caso impar
+            if (n % 2 != 0)
                 C[i][j] += A[i][n - 1] * B[n - 1][j];
         }
     return C;
@@ -41,7 +43,7 @@ Matrix NaivLoopUnrollingTwo(const Matrix& A, const Matrix& B) {
 
 Matrix NaivLoopUnrollingFour(const Matrix& A, const Matrix& B) {
     int n = A.size();
-    Matrix C(n, std::vector<int>(n, 0));
+    Matrix C(n, std::vector<long long>(n, 0));
     for (int i = 0; i < n; i++)
         for (int j = 0; j < n; j++) {
             for (int k = 0; k < n / 4 * 4; k += 4) {
@@ -50,7 +52,7 @@ Matrix NaivLoopUnrollingFour(const Matrix& A, const Matrix& B) {
                 C[i][j] += A[i][k + 2] * B[k + 2][j];
                 C[i][j] += A[i][k + 3] * B[k + 3][j];
             }
-            for (int k = n / 4 * 4; k < n; k++)  // elementos restantes
+            for (int k = n / 4 * 4; k < n; k++)
                 C[i][j] += A[i][k] * B[k][j];
         }
     return C;
@@ -58,10 +60,9 @@ Matrix NaivLoopUnrollingFour(const Matrix& A, const Matrix& B) {
 
 Matrix WinogradOriginal(const Matrix& A, const Matrix& B) {
     int n = A.size();
-    Matrix C(n, std::vector<int>(n, 0));
-    std::vector<int> rowFactor(n, 0), colFactor(n, 0);
+    Matrix C(n, std::vector<long long>(n, 0));
+    std::vector<long long> rowFactor(n, 0), colFactor(n, 0);
 
-    // Precomputar los factores de fila y columna
     for (int i = 0; i < n; i++)
         for (int j = 0; j < n / 2; j++)
             rowFactor[i] += A[i][2 * j] * A[i][2 * j + 1];
@@ -70,7 +71,6 @@ Matrix WinogradOriginal(const Matrix& A, const Matrix& B) {
         for (int j = 0; j < n / 2; j++)
             colFactor[i] += B[2 * j][i] * B[2 * j + 1][i];
 
-    // Calcular la matriz de salida
     for (int i = 0; i < n; i++)
         for (int j = 0; j < n; j++) {
             C[i][j] = -rowFactor[i] - colFactor[j];
@@ -84,10 +84,9 @@ Matrix WinogradOriginal(const Matrix& A, const Matrix& B) {
 
 Matrix WinogradScaled(const Matrix& A, const Matrix& B) {
     int n = A.size();
-    Matrix C(n, std::vector<int>(n, 0));
-    std::vector<int> rowFactor(n, 0), colFactor(n, 0);
+    Matrix C(n, std::vector<long long>(n, 0));
+    std::vector<long long> rowFactor(n, 0), colFactor(n, 0);
 
-    // Calcular factores de fila y columna con optimización de escala
     for (int i = 0; i < n; i++)
         for (int j = 0; j < n / 2; j++)
             rowFactor[i] += A[i][2 * j] * A[i][2 * j + 1];
@@ -96,7 +95,6 @@ Matrix WinogradScaled(const Matrix& A, const Matrix& B) {
         for (int j = 0; j < n / 2; j++)
             colFactor[i] += B[2 * j][i] * B[2 * j + 1][i];
 
-    // Calcular matriz de salida usando factores precomputados
     for (int i = 0; i < n; i++)
         for (int j = 0; j < n; j++) {
             C[i][j] = -rowFactor[i] - colFactor[j];
@@ -110,7 +108,7 @@ Matrix WinogradScaled(const Matrix& A, const Matrix& B) {
 
 Matrix SequentialBlock(const Matrix& A, const Matrix& B, int blockSize) {
     int n = A.size();
-    Matrix C(n, std::vector<int>(n, 0));
+    Matrix C(n, std::vector<long long>(n, 0));
     for (int ii = 0; ii < n; ii += blockSize)
         for (int jj = 0; jj < n; jj += blockSize)
             for (int kk = 0; kk < n; kk += blockSize)
@@ -131,7 +129,7 @@ void multiplyBlock(const Matrix& A, const Matrix& B, Matrix& C, int ii, int jj, 
 
 Matrix ParallelBlock(const Matrix& A, const Matrix& B, int blockSize) {
     int n = A.size();
-    Matrix C(n, std::vector<int>(n, 0));
+    Matrix C(n, std::vector<long long>(n, 0));
     std::vector<std::thread> threads;
 
     for (int ii = 0; ii < n; ii += blockSize)
@@ -145,7 +143,7 @@ Matrix ParallelBlock(const Matrix& A, const Matrix& B, int blockSize) {
 
 Matrix IV_3_SequentialBlock(const Matrix& A, const Matrix& B, int blockSize) {
     int n = A.size();
-    Matrix C(n, std::vector<int>(n, 0));
+    Matrix C(n, std::vector<long long>(n, 0));
 
     for (int ii = 0; ii < n; ii += blockSize)
         for (int jj = 0; jj < n; jj += blockSize)
@@ -157,7 +155,7 @@ Matrix IV_3_SequentialBlock(const Matrix& A, const Matrix& B, int blockSize) {
 
 Matrix IV_4_ParallelBlock(const Matrix& A, const Matrix& B, int blockSize) {
     int n = A.size();
-    Matrix C(n, std::vector<int>(n, 0));
+    Matrix C(n, std::vector<long long>(n, 0));
     std::vector<std::thread> threads;
 
     for (int ii = 0; ii < n; ii += blockSize)
@@ -169,9 +167,10 @@ Matrix IV_4_ParallelBlock(const Matrix& A, const Matrix& B, int blockSize) {
     return C;
 }
 
+
 Matrix IV_5_EnhancedParallelBlock(const Matrix& A, const Matrix& B, int blockSize) {
     int n = A.size();
-    Matrix C(n, std::vector<int>(n, 0));
+    Matrix C(n, std::vector<long long>(n, 0));
     std::vector<std::thread> threads;
     int maxThreads = std::thread::hardware_concurrency();  // Número máximo de hilos disponibles
 
@@ -188,7 +187,6 @@ Matrix IV_5_EnhancedParallelBlock(const Matrix& A, const Matrix& B, int blockSiz
     for (auto& t : threads) t.join();
     return C;
 }
-
 
 //---------------------------------------Utils---------------------------------------
 void generarMatrizPrueba(int n, const std::string &nombreArchivo) {
@@ -213,8 +211,8 @@ void generarMatrizPrueba(int n, const std::string &nombreArchivo) {
     }
 }
 
-std::vector<std::vector<int>> cargarMatriz(const std::string &nombreArchivo, int n) {
-    std::vector<std::vector<int>> matriz(n, std::vector<int>(n));
+std::vector<std::vector<long long>> cargarMatriz(const std::string &nombreArchivo, int n) {
+    std::vector<std::vector<long long>> matriz(n, std::vector<long long>(n));
     std::ifstream archivo(nombreArchivo);
 
     if (archivo.is_open()) {
@@ -256,7 +254,7 @@ void agregarEncabezadoSiEsNecesario(const std::string &ruta) {
     if (archivoVacio) {
         std::ofstream archivoEscritura(ruta);
         if (archivoEscritura.is_open()) {
-            archivoEscritura << "Algoritmo,Tamaño,Tiempo(ms)\n";
+            archivoEscritura << "Algoritmo,Tamaño,Tiempo(s)\n";
             archivoEscritura.close();
         } else {
             std::cerr << "No se pudo abrir el archivo para escribir el encabezado.\n";
@@ -264,7 +262,7 @@ void agregarEncabezadoSiEsNecesario(const std::string &ruta) {
     }
 }
 
-void guardarResultadoEnArchivo(const std::vector<std::vector<int>> &matriz, const std::string &nombreArchivo) {
+void guardarResultadoEnArchivo(const std::vector<std::vector<long long>> &matriz, const std::string &nombreArchivo) {
     // Crear el directorio para los resultados de matrices si no existe
     std::filesystem::create_directories("../src/data/results/matrices");
 
@@ -287,7 +285,7 @@ void ejecutarAlgoritmo(const std::string &algoritmo, const std::string &archivoA
     auto B = cargarMatriz(archivoB, n);
 
     auto inicio = std::chrono::high_resolution_clock::now();
-    std::vector<std::vector<int>> resultado;
+    std::vector<std::vector<long long>> resultado;
 
     if (algoritmo == "Naiv") {
         resultado = multiplicacionNaiv(A, B, n);
@@ -315,7 +313,7 @@ void ejecutarAlgoritmo(const std::string &algoritmo, const std::string &archivoA
     }
 
     auto fin = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double, std::milli> tiempo = fin - inicio;
+    std::chrono::duration<double> tiempo = fin - inicio;
 
     registrarTiempo(algoritmo, n, tiempo.count());
 
@@ -325,14 +323,14 @@ void ejecutarAlgoritmo(const std::string &algoritmo, const std::string &archivoA
 }
 
 int main() {
-    const int n = 4;  // Tamaño de la matriz (ajustable)
-    const std::string archivoA = "../src/data/test_cases/matrizA4.txt";
-    const std::string archivoB = "../src/data/test_cases/matrizB4.txt";
+    const int n = 256;  // Tamaño de la matriz (ajustable)
+    const std::string archivoA = "../src/data/test_cases/matrizA256.txt";
+    const std::string archivoB = "../src/data/test_cases/matrizB256.txt";
     std::string rutaCSV = "../src/data/results/resultadosC++.csv";
 
     // Generación de matrices de prueba si aún no existen
-    if (!std::ifstream(archivoA)) generarMatrizPrueba(n, archivoA);
-    if (!std::ifstream(archivoB)) generarMatrizPrueba(n, archivoB);
+    //if (!std::ifstream(archivoA)) generarMatrizPrueba(n, archivoA);
+    //if (!std::ifstream(archivoB)) generarMatrizPrueba(n, archivoB);
 
     // Agregar el encabezado si el archivo está vacío
     agregarEncabezadoSiEsNecesario(rutaCSV);
