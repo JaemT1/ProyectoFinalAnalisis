@@ -19,8 +19,8 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 def main():
     # Ruta completa de las matrices utilizando BASE_DIR
-    matrizA_path = os.path.join(BASE_DIR, '../data/test_cases/matrizA256.txt')
-    matrizB_path = os.path.join(BASE_DIR, '../data/test_cases/matrizB256.txt')
+    matrizA_path = os.path.join(BASE_DIR, '../data/test_cases/matrizA128.txt')
+    matrizB_path = os.path.join(BASE_DIR, '../data/test_cases/matrizB128.txt')
 
     # Cargar las matrices desde el archivo .txt
     matriz1_cargada = cargar_matriz_desde_txt(matrizA_path)

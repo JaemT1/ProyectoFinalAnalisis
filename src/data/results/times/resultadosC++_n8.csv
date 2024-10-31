@@ -1,0 +1,11 @@
+Algoritmo,Tamaño,Tiempo(s)
+Naiv,8,3.94e-05
+LoopUnrollingTwo,8,3.8e-05
+LoopUnrollingFour,8,2.09e-05
+WinogradOriginal,8,4.08e-05
+WinogradScaled,8,2.43e-05
+SequentialBlock,8,2.25e-05
+ParallelBlock,8,0.0092626
+IV_3_SequentialBlock,8,2.41e-05
+IV_4_ParallelBlock,8,0.0008689
+IV_5_EnhancedParallelBlock,8,0.025757

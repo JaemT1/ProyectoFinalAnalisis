@@ -229,7 +229,7 @@ std::vector<std::vector<long long>> cargarMatriz(const std::string &nombreArchiv
 
 void registrarTiempo(const std::string &algoritmo, int tamanoMatriz, double tiempo) {
     // Establecer la ruta relativa desde el directorio de trabajo actual
-    std::string ruta = "../src/data/results/resultadosC++.csv";
+    std::string ruta = "../src/data/results/times/resultadosC++_n" + std::to_string(tamanoMatriz) + ".csv";
 
     // Crear el directorio si no existe
     std::filesystem::create_directories("../src/data/results");
@@ -323,10 +323,10 @@ void ejecutarAlgoritmo(const std::string &algoritmo, const std::string &archivoA
 }
 
 int main() {
-    const int n = 256;  // Tamaño de la matriz (ajustable)
-    const std::string archivoA = "../src/data/test_cases/matrizA256.txt";
-    const std::string archivoB = "../src/data/test_cases/matrizB256.txt";
-    std::string rutaCSV = "../src/data/results/resultadosC++.csv";
+    const int n = 128;  // Tamaño de la matriz (ajustable)
+    const std::string archivoA = "../src/data/test_cases/matrizA" + std::to_string(n) + ".txt";
+    const std::string archivoB = "../src/data/test_cases/matrizB" + std::to_string(n) + ".txt";
+    std::string rutaCSV = "../src/data/results/times/resultadosC++_n" + std::to_string(n) + ".csv";
 
     // Generación de matrices de prueba si aún no existen
     //if (!std::ifstream(archivoA)) generarMatrizPrueba(n, archivoA);

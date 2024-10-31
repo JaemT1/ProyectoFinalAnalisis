@@ -5,3 +5,5 @@ def multiplicar_naiv(matriz1, matriz2, n):
             for k in range(n):
                 resultado[i][j] += matriz1[i][k] * matriz2[k][j]
     return resultado
+
+
