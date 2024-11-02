@@ -323,30 +323,38 @@ void ejecutarAlgoritmo(const std::string &algoritmo, const std::string &archivoA
 }
 
 int main() {
-    const int n = 128;  // Tamaño de la matriz (ajustable)
-    const std::string archivoA = "../src/data/test_cases/matrizA" + std::to_string(n) + ".txt";
-    const std::string archivoB = "../src/data/test_cases/matrizB" + std::to_string(n) + ".txt";
-    std::string rutaCSV = "../src/data/results/times/resultadosC++_n" + std::to_string(n) + ".csv";
+    for(int i = 1; i < 9; i++) {
+        const int n = pow(2,i);  // Tamaño de la matriz (ajustable)
+        const std::string archivoA = "../src/data/test_cases/matrizA" + std::to_string(n) + ".txt";
+        const std::string archivoB = "../src/data/test_cases/matrizB" + std::to_string(n) + ".txt";
+        std::string rutaCSV = "../src/data/results/times/resultadosC++_n" + std::to_string(n) + ".csv";
 
-    // Generación de matrices de prueba si aún no existen
-    //if (!std::ifstream(archivoA)) generarMatrizPrueba(n, archivoA);
-    //if (!std::ifstream(archivoB)) generarMatrizPrueba(n, archivoB);
+        // Generación de matrices de prueba si aún no existen
+        //if (!std::ifstream(archivoA)) generarMatrizPrueba(n, archivoA);
+        //if (!std::ifstream(archivoB)) generarMatrizPrueba(n, archivoB);
 
-    // Agregar el encabezado si el archivo está vacío
-    agregarEncabezadoSiEsNecesario(rutaCSV);
+        std::string ruta = "../src/data/results/times/resultadosC++_n" + std::to_string(n) + ".csv";
+        std::ofstream archivo(ruta, std::ios::trunc);
+        archivo << "";
+        archivo.close();
 
-    // Ejecución de los algoritmos y medición de tiempo
-    ejecutarAlgoritmo("Naiv", archivoA, archivoB, n);
-    ejecutarAlgoritmo("LoopUnrollingTwo", archivoA, archivoB, n);
-    ejecutarAlgoritmo("LoopUnrollingFour", archivoA, archivoB, n);
-    ejecutarAlgoritmo("WinogradOriginal", archivoA, archivoB, n);
-    ejecutarAlgoritmo("WinogradScaled", archivoA, archivoB, n);
-    ejecutarAlgoritmo("SequentialBlock", archivoA, archivoB, n);
-    ejecutarAlgoritmo("ParallelBlock", archivoA, archivoB, n);
-    ejecutarAlgoritmo("IV_3_SequentialBlock", archivoA, archivoB, n);
-    ejecutarAlgoritmo("IV_4_ParallelBlock", archivoA, archivoB, n);
-    ejecutarAlgoritmo("IV_5_EnhancedParallelBlock", archivoA, archivoB, n);
+        // Agregar el encabezado si el archivo está vacío
+        agregarEncabezadoSiEsNecesario(rutaCSV);
 
-    std::cout << "Ejecución de algoritmos completada. Resultados guardados en resultados.csv\n";
+        // Ejecución de los algoritmos y medición de tiempo
+        ejecutarAlgoritmo("Naiv", archivoA, archivoB, n);
+        ejecutarAlgoritmo("LoopUnrollingTwo", archivoA, archivoB, n);
+        ejecutarAlgoritmo("LoopUnrollingFour", archivoA, archivoB, n);
+        ejecutarAlgoritmo("WinogradOriginal", archivoA, archivoB, n);
+        ejecutarAlgoritmo("WinogradScaled", archivoA, archivoB, n);
+        ejecutarAlgoritmo("SequentialBlock", archivoA, archivoB, n);
+        ejecutarAlgoritmo("ParallelBlock", archivoA, archivoB, n);
+        ejecutarAlgoritmo("IV_3_SequentialBlock", archivoA, archivoB, n);
+        ejecutarAlgoritmo("IV_4_ParallelBlock", archivoA, archivoB, n);
+        ejecutarAlgoritmo("IV_5_EnhancedParallelBlock", archivoA, archivoB, n);
+
+        std::cout << "Ejecución de algoritmos completada. Resultados guardados en resultados.csv\n";
+    }
+
     return 0;
 }
