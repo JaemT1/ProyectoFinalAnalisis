@@ -1,18 +1,21 @@
+from gc import freeze
+from multiprocessing.spawn import freeze_support
+
 import numpy as np
 import os
 import pandas as pd
 
-from algorithms.NaivOnArray import multiplicar_naiv
-from algorithms.NaivLoopUnrollingTwo import multiplicar_naiv_loop_unrolling_two
-from algorithms.NaivLoopUnrollingFour import multiplicar_naiv_loop_unrolling_four
-from algorithms.WinogradOriginal import multiplicar_winograd_original
-from algorithms.WinogradScaled import multiplicar_winograd_escalado
-from algorithms.SequentialBlock import multiplicar_sequential_block
-from algorithms.ParallelBlock import multiplicar_parallel_block
-from algorithms.IV3SequentialBlock import multiplicar_iv3_sequential_block
-from algorithms.IV4ParallelBlock import multiplicar_iv4_parallel_block
-from algorithms.IV5EnhancedParallelBlock import multiplicar_iv5_enhanced_parallel_block
-from utils.ArchivoUtilidades import generar_matriz, guardar_matriz_en_txt, cargar_matriz_desde_txt, medir_tiempo
+from src.python.algorithms.NaivOnArray import multiplicar_naiv
+from src.python.algorithms.NaivLoopUnrollingTwo import multiplicar_naiv_loop_unrolling_two
+from src.python.algorithms.NaivLoopUnrollingFour import multiplicar_naiv_loop_unrolling_four
+from src.python.algorithms.WinogradOriginal import multiplicar_winograd_original
+from src.python.algorithms.WinogradScaled import multiplicar_winograd_escalado
+from src.python.algorithms.SequentialBlock import multiplicar_sequential_block
+from src.python.algorithms.ParallelBlock import multiplicar_parallel_block
+from src.python.algorithms.IV3SequentialBlock import multiplicar_iv3_sequential_block
+from src.python.algorithms.IV4ParallelBlock import multiplicar_iv4_parallel_block
+from src.python.algorithms.IV5EnhancedParallelBlock import multiplicar_iv5_enhanced_parallel_block
+from src.python.utils.ArchivoUtilidades import generar_matriz, guardar_matriz_en_txt, cargar_matriz_desde_txt, medir_tiempo
 
 # Definir la ruta base del directorio donde está main.py
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -69,3 +72,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
