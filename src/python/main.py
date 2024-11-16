@@ -68,7 +68,8 @@ def main():
         # Guardar resultados en CSV
         df_resultados = pd.DataFrame(resultados)
         df_resultados.to_csv(filepath, index=False)
-        print(f"Resultados guardados en {filepath}")
+        print(f"Ejecución de los algoritmos en Python para tamaño {2**i}*{2**i} completada\n")
+
 
 if __name__ == "__main__":
     main()

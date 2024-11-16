@@ -45,7 +45,7 @@ for size, times in comparison_data.items():
     df = pd.DataFrame({"Python": times["Python"], "C++": times["C++"]})
 
     # Crear la figura y el gráfico de barras agrupadas
-    plt.figure(figsize=(10, 8))  # Aumentar la altura de la figura
+    plt.figure(figsize=(9, 7.2))  # Aumentar la altura de la figura
     ax = df.plot(kind="bar", color=["skyblue", "salmon"], width=0.8, ax=plt.gca())
 
     # Personalizar el gráfico

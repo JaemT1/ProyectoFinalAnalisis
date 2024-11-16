@@ -353,8 +353,7 @@ int main() {
         ejecutarAlgoritmo("IV_4_ParallelBlock", archivoA, archivoB, n);
         ejecutarAlgoritmo("IV_5_EnhancedParallelBlock", archivoA, archivoB, n);
 
-        std::cout << "Ejecución de algoritmos completada. Resultados guardados en resultados.csv\n";
-    }
+        std::cout << "Ejecucion de los algoritmos en C++ para tamano " << n << "*" << n << " completada\n";    }
 
     return 0;
 }

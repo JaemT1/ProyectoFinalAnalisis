@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_STATIC_LINKER_FLAGS "-static")
 
 # Fuerza la vinculación estática de las bibliotecas estándar de C++
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static-libgcc -static-libstdc++ -static-libwinpthread")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static-libgcc -static-libstdc++")
 
 # Añadir el ejecutable
 add_executable(PRoyectoFinal src/cpp/main.cpp)
