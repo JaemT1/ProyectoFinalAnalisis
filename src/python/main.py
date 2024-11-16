@@ -10,8 +10,8 @@ from src.python.algorithms.NaivLoopUnrollingTwo import multiplicar_naiv_loop_unr
 from src.python.algorithms.NaivLoopUnrollingFour import multiplicar_naiv_loop_unrolling_four
 from src.python.algorithms.WinogradOriginal import multiplicar_winograd_original
 from src.python.algorithms.WinogradScaled import multiplicar_winograd_escalado
-from src.python.algorithms.SequentialBlock import multiplicar_sequential_block
-from src.python.algorithms.ParallelBlock import multiplicar_parallel_block
+from src.python.algorithms.III3SequentialBlock import multiplicar_iii3_sequential_block
+from src.python.algorithms.III4ParallelBlock import multiplicar_iii4_parallel_block
 from src.python.algorithms.IV3SequentialBlock import multiplicar_iv3_sequential_block
 from src.python.algorithms.IV4ParallelBlock import multiplicar_iv4_parallel_block
 from src.python.algorithms.IV5EnhancedParallelBlock import multiplicar_iv5_enhanced_parallel_block
@@ -42,8 +42,8 @@ def main():
             'LoopUnrollingFour': multiplicar_naiv_loop_unrolling_four,
             'WinogradOriginal': multiplicar_winograd_original,
             'WinogradScaled': multiplicar_winograd_escalado,
-            'SequentialBlock': multiplicar_sequential_block,
-            'ParallelBlock': lambda m1, m2, n: multiplicar_parallel_block(m1, m2, n, 64),
+            'III_3_SequentialBlock': multiplicar_iii3_sequential_block,
+            'III_4_ParallelBlock': lambda m1, m2, n: multiplicar_iii4_parallel_block(m1, m2, n, 64),
             'IV_3_SequentialBlock': multiplicar_iv3_sequential_block,
             'IV_4_ParallelBlock': lambda m1, m2, n: multiplicar_iv4_parallel_block(m1, m2, n, 64),
             'IV_5_EnhancedParallelBlock': multiplicar_iv5_enhanced_parallel_block

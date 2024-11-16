@@ -10,7 +10,7 @@ def calcular_bloque(matriz1, matriz2, n, ii, jj, block_size):
             bloque_resultado.append((i, j, suma))  # Almacenar el resultado del bloque
     return bloque_resultado
 
-def multiplicar_parallel_block(matriz1, matriz2, n, block_size=64):
+def multiplicar_iii4_parallel_block(matriz1, matriz2, n, block_size=64):
     resultado = multiprocessing.Array('d', n * n)  # Crear un array unidimensional compartido
 
     # Crear un grupo de procesos para los bloques

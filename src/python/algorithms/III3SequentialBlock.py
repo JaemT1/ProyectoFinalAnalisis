@@ -1,4 +1,4 @@
-def multiplicar_sequential_block(matriz1, matriz2, n, block_size=64):
+def multiplicar_iii3_sequential_block(matriz1, matriz2, n, block_size=64):
     resultado = [[0] * n for _ in range(n)]
     for ii in range(0, n, block_size):
         for jj in range(0, n, block_size):

@@ -106,7 +106,7 @@ Matrix WinogradScaled(const Matrix& A, const Matrix& B) {
     return C;
 }
 
-Matrix SequentialBlock(const Matrix& A, const Matrix& B, int blockSize) {
+Matrix III_3_SequentialBlock(const Matrix& A, const Matrix& B, int blockSize) {
     int n = A.size();
     Matrix C(n, std::vector<long long>(n, 0));
     for (int ii = 0; ii < n; ii += blockSize)
@@ -127,7 +127,7 @@ void multiplyBlock(const Matrix& A, const Matrix& B, Matrix& C, int ii, int jj, 
                 C[i][j] += A[i][k] * B[k][j];
 }
 
-Matrix ParallelBlock(const Matrix& A, const Matrix& B, int blockSize) {
+Matrix III_4_ParallelBlock(const Matrix& A, const Matrix& B, int blockSize) {
     int n = A.size();
     Matrix C(n, std::vector<long long>(n, 0));
     std::vector<std::thread> threads;
@@ -298,9 +298,9 @@ void ejecutarAlgoritmo(const std::string &algoritmo, const std::string &archivoA
     } else if (algoritmo == "WinogradScaled") {
         resultado = WinogradScaled(A, B);
     } else if (algoritmo == "SequentialBlock") {
-        resultado = SequentialBlock(A, B, 16);
+        resultado = III_3_SequentialBlock(A, B, 16);
     } else if (algoritmo == "ParallelBlock") {
-        resultado = ParallelBlock(A, B, 16);
+        resultado = III_4_ParallelBlock(A, B, 16);
     } else if (algoritmo == "IV_3_SequentialBlock") {
         resultado = IV_3_SequentialBlock(A, B, 16);
     } else if (algoritmo == "IV_4_ParallelBlock") {
@@ -347,8 +347,8 @@ int main() {
         ejecutarAlgoritmo("LoopUnrollingFour", archivoA, archivoB, n);
         ejecutarAlgoritmo("WinogradOriginal", archivoA, archivoB, n);
         ejecutarAlgoritmo("WinogradScaled", archivoA, archivoB, n);
-        ejecutarAlgoritmo("SequentialBlock", archivoA, archivoB, n);
-        ejecutarAlgoritmo("ParallelBlock", archivoA, archivoB, n);
+        ejecutarAlgoritmo("III_3_SequentialBlock", archivoA, archivoB, n);
+        ejecutarAlgoritmo("III_4_ParallelBlock", archivoA, archivoB, n);
         ejecutarAlgoritmo("IV_3_SequentialBlock", archivoA, archivoB, n);
         ejecutarAlgoritmo("IV_4_ParallelBlock", archivoA, archivoB, n);
         ejecutarAlgoritmo("IV_5_EnhancedParallelBlock", archivoA, archivoB, n);
