@@ -1,31 +1,38 @@
-import multiprocessing
+import numpy as np
+from multiprocessing import Pool, Array
 
-def calcular_bloque(matriz1, matriz2, n, ii, jj, block_size):
-    bloque_resultado = []
-    for i in range(ii, min(ii + block_size, n)):
-        for j in range(jj, min(jj + block_size, n)):
-            suma = 0
-            for k in range(n):
-                suma += matriz1[i][k] * matriz2[k][j]
-            bloque_resultado.append((i, j, suma))  # Almacenar el resultado del bloque
-    return bloque_resultado
+def calcular_bloque(matriz1, matriz2, ii, jj, n, block_size):
+    """
+    Calcula un bloque de la matriz resultado usando NumPy.
+    """
+    # Extraer los bloques relevantes de las matrices
+    bloque_matriz1 = matriz1[ii:ii + block_size]
+    bloque_matriz2 = matriz2[:, jj:jj + block_size]
+    # Multiplicar los bloques y devolverlos como una lista
+    bloque_resultado = np.dot(bloque_matriz1, bloque_matriz2)
+    return ii, jj, bloque_resultado
 
 def multiplicar_iii4_parallel_block(matriz1, matriz2, n, block_size=2):
-    resultado = multiprocessing.Array('d', n * n)  # Crear un array unidimensional compartido
+    """
+    Multiplica matrices usando bloques en paralelo, optimizado con NumPy.
+    """
+    # Convertir las matrices a NumPy
+    matriz1 = np.array(matriz1)
+    matriz2 = np.array(matriz2)
+    resultado = np.zeros((n, n))
 
-    # Crear un grupo de procesos para los bloques
-    with multiprocessing.Pool() as pool:
+    # Crear el grupo de procesos
+    with Pool() as pool:
         tareas = []
+
+        # Programar tareas para cada bloque
         for ii in range(0, n, block_size):
             for jj in range(0, n, block_size):
-                # Programar cada bloque como una tarea asincrónica
-                tareas.append(pool.apply_async(calcular_bloque, args=(matriz1, matriz2, n, ii, jj, block_size)))
+                tareas.append(pool.apply_async(calcular_bloque, args=(matriz1, matriz2, ii, jj, n, block_size)))
 
-        # Recoger los resultados de todas las tareas
+        # Recoger los resultados de cada tarea
         for tarea in tareas:
-            for i, j, suma in tarea.get():
-                resultado[i * n + j] += suma  # Actualizar el resultado en el índice correspondiente
+            ii, jj, bloque_resultado = tarea.get()
+            resultado[ii:ii + block_size, jj:jj + block_size] += bloque_resultado
 
-    # Convertir el array unidimensional en una matriz 2D para el resultado final
-    resultado_final = [[resultado[i * n + j] for j in range(n)] for i in range(n)]
-    return resultado_final
+    return resultado.tolist()

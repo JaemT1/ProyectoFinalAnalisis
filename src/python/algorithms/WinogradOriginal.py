@@ -1,23 +1,33 @@
+import numpy as np
+
 def multiplicar_winograd_original(matriz1, matriz2, n):
-    resultado = [[0] * n for _ in range(n)]
-    row_factor = [0] * n
-    col_factor = [0] * n
+    # Convertir las matrices a arrays de numpy para aprovechar operaciones vectorizadas
+    matriz1 = np.array(matriz1)
+    matriz2 = np.array(matriz2)
 
+    # Inicializar las matrices de resultado y los factores
+    resultado = np.zeros((n, n))
+    row_factor = np.zeros(n)
+    col_factor = np.zeros(n)
+
+    # Calcular los factores de fila (row_factor)
     for i in range(n):
-        row_factor[i] = sum(matriz1[i][2 * j] * matriz1[i][2 * j + 1] for j in range(n // 2))
+        row_factor[i] = np.sum(matriz1[i, ::2] * matriz1[i, 1::2])
 
-    for i in range(n):
-        col_factor[i] = sum(matriz2[2 * j][i] * matriz2[2 * j + 1][i] for j in range(n // 2))
+    # Calcular los factores de columna (col_factor)
+    for j in range(n):
+        col_factor[j] = np.sum(matriz2[::2, j] * matriz2[1::2, j])
 
+    # Calcular el producto utilizando Winograd
     for i in range(n):
         for j in range(n):
-            resultado[i][j] = -row_factor[i] - col_factor[j]
-            for k in range(n // 2):
-                resultado[i][j] += (matriz1[i][2 * k + 1] + matriz2[2 * k][j]) * (matriz1[i][2 * k] + matriz2[2 * k + 1][j])
+            suma = -row_factor[i] - col_factor[j]
+            # Calcular la contribución de los productos restantes
+            suma += np.sum((matriz1[i, ::2] + matriz2[1::2, j]) * (matriz1[i, 1::2] + matriz2[::2, j]))
+            resultado[i, j] = suma
 
+    # Si n es impar, agregar el último producto
     if n % 2 == 1:
-        for i in range(n):
-            for j in range(n):
-                resultado[i][j] += matriz1[i][n - 1] * matriz2[n - 1][j]
+        resultado += matriz1[:, n-1, np.newaxis] * matriz2[n-1, :]
 
-    return resultado
+    return resultado.tolist()

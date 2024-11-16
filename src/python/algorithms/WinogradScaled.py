@@ -1,32 +1,33 @@
+import numpy as np
+
 def multiplicar_winograd_escalado(matriz1, matriz2, n):
-    # Inicializa la matriz resultado y los factores de fila y columna
-    resultado = [[0] * n for _ in range(n)]
-    row_factor = [0] * n
-    col_factor = [0] * n
+    # Convertir las matrices a arrays de numpy para aprovechar operaciones vectorizadas
+    matriz1 = np.array(matriz1)
+    matriz2 = np.array(matriz2)
 
-    # Calcular los factores de las filas de matriz1
+    # Inicializar las matrices de resultados y los factores
+    resultado = np.zeros((n, n))
+    row_factor = np.zeros(n)
+    col_factor = np.zeros(n)
+
+    # Precomputar los factores de las filas de matriz1
     for i in range(n):
-        for j in range(n // 2):
-            row_factor[i] += matriz1[i][2 * j] * matriz1[i][2 * j + 1]
+        row_factor[i] = np.sum(matriz1[i, ::2] * matriz1[i, 1::2])
 
-    # Calcular los factores de las columnas de matriz2
+    # Precomputar los factores de las columnas de matriz2
     for j in range(n):
-        for i in range(n // 2):
-            col_factor[j] += matriz2[2 * i][j] * matriz2[2 * i + 1][j]
+        col_factor[j] = np.sum(matriz2[::2, j] * matriz2[1::2, j])
 
-    # Calcular la matriz resultado usando los factores escalados
+    # Calcular el producto utilizando los factores escalados
     for i in range(n):
         for j in range(n):
-            # Iniciar el valor de resultado con los factores de fila y columna
-            resultado[i][j] = -row_factor[i] - col_factor[j]
-            for k in range(n // 2):
-                resultado[i][j] += (matriz1[i][2 * k] + matriz2[2 * k + 1][j]) * \
-                                   (matriz1[i][2 * k + 1] + matriz2[2 * k][j])
+            suma = -row_factor[i] - col_factor[j]
+            # Calcular la contribución de los productos restantes
+            suma += np.sum((matriz1[i, ::2] + matriz2[1::2, j]) * (matriz1[i, 1::2] + matriz2[::2, j]))
+            resultado[i, j] = suma
 
-    # Si n es impar, sumar el último producto correspondiente
+    # Si n es impar, agregar el último elemento
     if n % 2 == 1:
-        for i in range(n):
-            for j in range(n):
-                resultado[i][j] += matriz1[i][n - 1] * matriz2[n - 1][j]
+        resultado += matriz1[:, n-1, np.newaxis] * matriz2[n-1, :]
 
-    return resultado
+    return resultado.tolist()
