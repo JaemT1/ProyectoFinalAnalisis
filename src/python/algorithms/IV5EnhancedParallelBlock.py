@@ -1,6 +1,6 @@
 import concurrent.futures
 
-def multiplicar_iv5_enhanced_parallel_block(matriz1, matriz2, n, block_size=64):
+def multiplicar_iv5_enhanced_parallel_block(matriz1, matriz2, n, block_size=2):
     resultado = [[0] * n for _ in range(n)]
 
     def calcular_bloque(ii, jj):

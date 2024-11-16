@@ -134,9 +134,11 @@ Matrix III_4_ParallelBlock(const Matrix& A, const Matrix& B, int blockSize) {
 
     for (int ii = 0; ii < n; ii += blockSize)
         for (int jj = 0; jj < n; jj += blockSize)
-            for (int kk = 0; kk < n; kk += blockSize)
-                threads.emplace_back(multiplyBlock, std::cref(A), std::cref(B), std::ref(C), ii, jj, kk, blockSize);
-
+            threads.emplace_back([&, ii, jj]()
+            {
+                for (int kk = 0; kk < n; kk += blockSize)
+                    multiplyBlock(std::cref(A), std::cref(B), std::ref(C), ii, jj, kk, blockSize);
+            });
     for (auto& t : threads) t.join();
     return C;
 }
@@ -160,9 +162,11 @@ Matrix IV_4_ParallelBlock(const Matrix& A, const Matrix& B, int blockSize) {
 
     for (int ii = 0; ii < n; ii += blockSize)
         for (int jj = 0; jj < n; jj += blockSize)
-            for (int kk = 0; kk < n; kk += blockSize)
-                threads.emplace_back(multiplyBlock, std::cref(A), std::cref(B), std::ref(C), ii, jj, kk, blockSize);
-
+            threads.emplace_back([&, ii, jj]()
+            {
+                for (int kk = 0; kk < n; kk += blockSize)
+                    multiplyBlock(std::cref(A), std::cref(B), std::ref(C), ii, jj, kk, blockSize);
+            });
     for (auto& t : threads) t.join();
     return C;
 }
@@ -297,16 +301,16 @@ void ejecutarAlgoritmo(const std::string &algoritmo, const std::string &archivoA
         resultado = WinogradOriginal(A, B);
     } else if (algoritmo == "WinogradScaled") {
         resultado = WinogradScaled(A, B);
-    } else if (algoritmo == "SequentialBlock") {
-        resultado = III_3_SequentialBlock(A, B, 16);
-    } else if (algoritmo == "ParallelBlock") {
-        resultado = III_4_ParallelBlock(A, B, 16);
+    } else if (algoritmo == "III_3_SequentialBlock") {
+        resultado = III_3_SequentialBlock(A, B, 2);
+    } else if (algoritmo == "III_4_ParallelBlock") {
+        resultado = III_4_ParallelBlock(A, B, 2);
     } else if (algoritmo == "IV_3_SequentialBlock") {
-        resultado = IV_3_SequentialBlock(A, B, 16);
+        resultado = IV_3_SequentialBlock(A, B, 2);
     } else if (algoritmo == "IV_4_ParallelBlock") {
-        resultado = IV_4_ParallelBlock(A, B, 16);
+        resultado = IV_4_ParallelBlock(A, B, 2);
     } else if (algoritmo == "IV_5_EnhancedParallelBlock") {
-        resultado = IV_5_EnhancedParallelBlock(A, B, 16);
+        resultado = IV_5_EnhancedParallelBlock(A, B, 2);
     } else {
         std::cerr << "Algoritmo no reconocido: " << algoritmo << std::endl;
         return;
