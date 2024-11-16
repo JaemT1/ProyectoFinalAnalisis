@@ -8,6 +8,7 @@
 #include <thread>
 #include <filesystem>
 #include <algorithm>
+#include <omp.h>
 
 using Matrix = std::vector<std::vector<long long>>;
 using namespace std;
@@ -17,7 +18,8 @@ using namespace chrono;
 //---------------------------------------Algorithms---------------------------------------
 
 
-Matrix multiplicacionNaiv(const Matrix &A, const Matrix &B, int n) {
+Matrix multiplicacionNaiv(const Matrix& A, const Matrix& B, int n)
+{
     Matrix C(n, std::vector<long long>(n, 0));
     for (int i = 0; i < n; ++i)
         for (int j = 0; j < n; ++j)
@@ -26,12 +28,15 @@ Matrix multiplicacionNaiv(const Matrix &A, const Matrix &B, int n) {
     return C;
 }
 
-Matrix NaivLoopUnrollingTwo(const Matrix& A, const Matrix& B) {
+Matrix NaivLoopUnrollingTwo(const Matrix& A, const Matrix& B)
+{
     int n = A.size();
     Matrix C(n, std::vector<long long>(n, 0));
     for (int i = 0; i < n; i++)
-        for (int j = 0; j < n; j++) {
-            for (int k = 0; k < n / 2 * 2; k += 2) {
+        for (int j = 0; j < n; j++)
+        {
+            for (int k = 0; k < n / 2 * 2; k += 2)
+            {
                 C[i][j] += A[i][k] * B[k][j];
                 C[i][j] += A[i][k + 1] * B[k + 1][j];
             }
@@ -41,12 +46,15 @@ Matrix NaivLoopUnrollingTwo(const Matrix& A, const Matrix& B) {
     return C;
 }
 
-Matrix NaivLoopUnrollingFour(const Matrix& A, const Matrix& B) {
+Matrix NaivLoopUnrollingFour(const Matrix& A, const Matrix& B)
+{
     int n = A.size();
     Matrix C(n, std::vector<long long>(n, 0));
     for (int i = 0; i < n; i++)
-        for (int j = 0; j < n; j++) {
-            for (int k = 0; k < n / 4 * 4; k += 4) {
+        for (int j = 0; j < n; j++)
+        {
+            for (int k = 0; k < n / 4 * 4; k += 4)
+            {
                 C[i][j] += A[i][k] * B[k][j];
                 C[i][j] += A[i][k + 1] * B[k + 1][j];
                 C[i][j] += A[i][k + 2] * B[k + 2][j];
@@ -58,7 +66,8 @@ Matrix NaivLoopUnrollingFour(const Matrix& A, const Matrix& B) {
     return C;
 }
 
-Matrix WinogradOriginal(const Matrix& A, const Matrix& B) {
+Matrix WinogradOriginal(const Matrix& A, const Matrix& B)
+{
     int n = A.size();
     Matrix C(n, std::vector<long long>(n, 0));
     std::vector<long long> rowFactor(n, 0), colFactor(n, 0);
@@ -72,7 +81,8 @@ Matrix WinogradOriginal(const Matrix& A, const Matrix& B) {
             colFactor[i] += B[2 * j][i] * B[2 * j + 1][i];
 
     for (int i = 0; i < n; i++)
-        for (int j = 0; j < n; j++) {
+        for (int j = 0; j < n; j++)
+        {
             C[i][j] = -rowFactor[i] - colFactor[j];
             for (int k = 0; k < n / 2; k++)
                 C[i][j] += (A[i][2 * k] + B[2 * k + 1][j]) * (A[i][2 * k + 1] + B[2 * k][j]);
@@ -82,7 +92,8 @@ Matrix WinogradOriginal(const Matrix& A, const Matrix& B) {
     return C;
 }
 
-Matrix WinogradScaled(const Matrix& A, const Matrix& B) {
+Matrix WinogradScaled(const Matrix& A, const Matrix& B)
+{
     int n = A.size();
     Matrix C(n, std::vector<long long>(n, 0));
     std::vector<long long> rowFactor(n, 0), colFactor(n, 0);
@@ -96,7 +107,8 @@ Matrix WinogradScaled(const Matrix& A, const Matrix& B) {
             colFactor[i] += B[2 * j][i] * B[2 * j + 1][i];
 
     for (int i = 0; i < n; i++)
-        for (int j = 0; j < n; j++) {
+        for (int j = 0; j < n; j++)
+        {
             C[i][j] = -rowFactor[i] - colFactor[j];
             for (int k = 0; k < n / 2; k++)
                 C[i][j] += (A[i][2 * k] + B[2 * k + 1][j]) * (A[i][2 * k + 1] + B[2 * k][j]);
@@ -106,7 +118,8 @@ Matrix WinogradScaled(const Matrix& A, const Matrix& B) {
     return C;
 }
 
-Matrix III_3_SequentialBlock(const Matrix& A, const Matrix& B, int blockSize) {
+Matrix III_3_SequentialBlock(const Matrix& A, const Matrix& B, int blockSize)
+{
     int n = A.size();
     Matrix C(n, std::vector<long long>(n, 0));
     for (int ii = 0; ii < n; ii += blockSize)
@@ -119,7 +132,8 @@ Matrix III_3_SequentialBlock(const Matrix& A, const Matrix& B, int blockSize) {
     return C;
 }
 
-void multiplyBlock(const Matrix& A, const Matrix& B, Matrix& C, int ii, int jj, int kk, int blockSize) {
+void multiplyBlock(const Matrix& A, const Matrix& B, Matrix& C, int ii, int jj, int kk, int blockSize)
+{
     int n = A.size();
     for (int i = ii; i < std::min(ii + blockSize, n); i++)
         for (int j = jj; j < std::min(jj + blockSize, n); j++)
@@ -130,27 +144,64 @@ void multiplyBlock(const Matrix& A, const Matrix& B, Matrix& C, int ii, int jj, 
 Matrix III_4_ParallelBlock(const Matrix& A, const Matrix& B, int blockSize) {
     int n = A.size();
     Matrix C(n, std::vector<long long>(n, 0));
-    std::vector<std::thread> threads;
 
-    for (int ii = 0; ii < n; ii += blockSize)
-        for (int jj = 0; jj < n; jj += blockSize)
-            threads.emplace_back([&, ii, jj]()
-            {
-                for (int kk = 0; kk < n; kk += blockSize)
-                    multiplyBlock(std::cref(A), std::cref(B), std::ref(C), ii, jj, kk, blockSize);
-            });
-    for (auto& t : threads) t.join();
+    // Paralelización de los bucles principales utilizando OpenMP
+#pragma omp parallel for collapse(2) // Paraleliza las dos primeras dimensiones ii y jj
+    for (int ii = 0; ii < n; ii += blockSize) {
+        for (int jj = 0; jj < n; jj += blockSize) {
+            // Aquí, paralelizamos el bucle más interno (el cálculo real de la multiplicación)
+#pragma omp parallel for collapse(2) // Paraleliza las iteraciones i y j
+            for (int i = ii; i < std::min(ii + blockSize, n); i++) {
+                for (int j = jj; j < std::min(jj + blockSize, n); j++) {
+                    // Usamos un bucle separado para el cálculo de la multiplicación de bloques
+                    for (int k = 0; k < n; k++) {
+                        C[i][j] += A[i][k] * B[k][j];
+                    }
+                }
+            }
+        }
+    }
+
     return C;
 }
 
-Matrix IV_3_SequentialBlock(const Matrix& A, const Matrix& B, int blockSize) {
+Matrix IV_3_SequentialBlock(const Matrix& A, const Matrix& B, int blockSize)
+{
     int n = A.size();
     Matrix C(n, std::vector<long long>(n, 0));
 
-    for (int ii = 0; ii < n; ii += blockSize)
-        for (int jj = 0; jj < n; jj += blockSize)
-            for (int kk = 0; kk < n; kk += blockSize)
-                multiplyBlock(A, B, C, ii, jj, kk, blockSize);
+    // Convertimos las matrices A y B a matrices planas para mejorar el acceso a memoria
+    std::vector<long long> A_flat(n * n), B_flat(n * n);
+
+    // Llenamos las matrices planas A_flat y B_flat
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < n; ++j) {
+            A_flat[i * n + j] = A[i][j];
+            B_flat[i * n + j] = B[i][j];
+        }
+    }
+
+    for (int ii = 0; ii < n; ii += blockSize) {
+        for (int jj = 0; jj < n; jj += blockSize) {
+            for (int kk = 0; kk < n; kk += blockSize) {
+                // Definimos los límites de los bloques
+                int ii_end = std::min(ii + blockSize, n);
+                int jj_end = std::min(jj + blockSize, n);
+                int kk_end = std::min(kk + blockSize, n);
+
+                // Multiplicación de bloques optimizada
+                for (int i = ii; i < ii_end; ++i) {
+                    for (int j = jj; j < jj_end; ++j) {
+                        long long sum = 0;
+                        for (int k = kk; k < kk_end; ++k) {
+                            sum += A_flat[i * n + k] * B_flat[k * n + j];
+                        }
+                        C[i][j] += sum;  // Sumamos directamente en C
+                    }
+                }
+            }
+        }
+    }
 
     return C;
 }
@@ -158,27 +209,61 @@ Matrix IV_3_SequentialBlock(const Matrix& A, const Matrix& B, int blockSize) {
 Matrix IV_4_ParallelBlock(const Matrix& A, const Matrix& B, int blockSize) {
     int n = A.size();
     Matrix C(n, std::vector<long long>(n, 0));
-    std::vector<std::thread> threads;
 
-    for (int ii = 0; ii < n; ii += blockSize)
-        for (int jj = 0; jj < n; jj += blockSize)
-            threads.emplace_back([&, ii, jj]()
-            {
-                for (int kk = 0; kk < n; kk += blockSize)
-                    multiplyBlock(std::cref(A), std::cref(B), std::ref(C), ii, jj, kk, blockSize);
-            });
-    for (auto& t : threads) t.join();
+    // Convertimos las matrices A y B a matrices planas para mejorar el acceso a memoria
+    std::vector<long long> A_flat(n * n), B_flat(n * n);
+
+    // Llenamos las matrices planas A_flat y B_flat
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < n; ++j) {
+            A_flat[i * n + j] = A[i][j];
+            B_flat[i * n + j] = B[i][j];
+        }
+    }
+
+    // Paralelización de los bucles principales utilizando OpenMP
+#pragma omp parallel for collapse(2) // Paraleliza las dos primeras dimensiones ii y jj
+    for (int ii = 0; ii < n; ii += blockSize) {
+        for (int jj = 0; jj < n; jj += blockSize) {
+            // Precalculamos los límites de los bloques
+            int ii_end = std::min(ii + blockSize, n);
+            int jj_end = std::min(jj + blockSize, n);
+
+            // Multiplicación de bloques optimizada con OpenMP
+            for (int kk = 0; kk < n; kk += blockSize) {
+                int kk_end = std::min(kk + blockSize, n);
+
+                // Paralelización de la multiplicación de bloques
+#pragma omp parallel for collapse(2) // Paraleliza las iteraciones i y j dentro del bloque
+                for (int i = ii; i < ii_end; ++i) {
+                    for (int j = jj; j < jj_end; ++j) {
+                        long long sum = 0;
+                        // Calculamos la multiplicación de bloques
+                        for (int k = kk; k < kk_end; ++k) {
+                            sum += A_flat[i * n + k] * B_flat[k * n + j];
+                        }
+#pragma omp atomic
+                        C[i][j] += sum;  // Asegura que la actualización de C sea atómica
+                    }
+                }
+            }
+        }
+    }
+
     return C;
 }
 
 
-Matrix IV_5_EnhancedParallelBlock(const Matrix& A, const Matrix& B, int blockSize) {
+
+Matrix IV_5_EnhancedParallelBlock(const Matrix& A, const Matrix& B, int blockSize)
+{
     int n = A.size();
     Matrix C(n, std::vector<long long>(n, 0));
     std::vector<std::thread> threads;
-    int maxThreads = std::thread::hardware_concurrency();  // Número máximo de hilos disponibles
+    int maxThreads = std::thread::hardware_concurrency(); // Número máximo de hilos disponibles
 
-    auto worker = [&](int threadId) {
+    auto worker = [&](int threadId)
+    {
         for (int ii = threadId * blockSize; ii < n; ii += blockSize * maxThreads)
             for (int jj = 0; jj < n; jj += blockSize)
                 for (int kk = 0; kk < n; kk += blockSize)
@@ -193,7 +278,8 @@ Matrix IV_5_EnhancedParallelBlock(const Matrix& A, const Matrix& B, int blockSiz
 }
 
 //---------------------------------------Utils---------------------------------------
-void generarMatrizPrueba(int n, const std::string &nombreArchivo) {
+void generarMatrizPrueba(int n, const std::string& nombreArchivo)
+{
     // Crear el directorio para guardar las matrices de prueba si no existe
     std::filesystem::create_directories("../src/data/test_cases");
 
@@ -202,36 +288,46 @@ void generarMatrizPrueba(int n, const std::string &nombreArchivo) {
     std::mt19937 gen(rd());
     std::uniform_int_distribution<> dist(100000, 999999);
 
-    if (archivo.is_open()) {
-        for (int i = 0; i < n; ++i) {
-            for (int j = 0; j < n; ++j) {
+    if (archivo.is_open())
+    {
+        for (int i = 0; i < n; ++i)
+        {
+            for (int j = 0; j < n; ++j)
+            {
                 archivo << dist(gen) << " ";
             }
             archivo << "\n";
         }
         archivo.close();
-    } else {
+    }
+    else
+    {
         std::cerr << "No se pudo abrir el archivo para escribir la matriz.\n";
     }
 }
 
-std::vector<std::vector<long long>> cargarMatriz(const std::string &nombreArchivo, int n) {
+std::vector<std::vector<long long>> cargarMatriz(const std::string& nombreArchivo, int n)
+{
     std::vector<std::vector<long long>> matriz(n, std::vector<long long>(n));
     std::ifstream archivo(nombreArchivo);
 
-    if (archivo.is_open()) {
+    if (archivo.is_open())
+    {
         for (int i = 0; i < n; ++i)
             for (int j = 0; j < n; ++j)
                 archivo >> matriz[i][j];
         archivo.close();
-    } else {
+    }
+    else
+    {
         std::cerr << "No se pudo abrir el archivo para leer la matriz.\n";
     }
     return matriz;
 }
 
 
-void registrarTiempo(const std::string &algoritmo, int tamanoMatriz, double tiempo) {
+void registrarTiempo(const std::string& algoritmo, int tamanoMatriz, double tiempo)
+{
     // Establecer la ruta relativa desde el directorio de trabajo actual
     std::string ruta = "../src/data/results/times/resultadosC++_n" + std::to_string(tamanoMatriz) + ".csv";
 
@@ -240,78 +336,114 @@ void registrarTiempo(const std::string &algoritmo, int tamanoMatriz, double tiem
 
     // Intentar abrir el archivo en modo de agregar
     std::ofstream archivo(ruta, std::ios::app);
-    if (archivo.is_open()) {
+    if (archivo.is_open())
+    {
         archivo << algoritmo << "," << tamanoMatriz << "," << tiempo << "\n";
         archivo.close();
-    } else {
+    }
+    else
+    {
         std::cerr << "No se pudo abrir el archivo para registrar el tiempo de ejecución.\n";
     }
 }
 
-void agregarEncabezadoSiEsNecesario(const std::string &ruta) {
+void agregarEncabezadoSiEsNecesario(const std::string& ruta)
+{
     // Comprobación de si el archivo ya contiene datos
     std::ifstream archivoLectura(ruta);
     bool archivoVacio = archivoLectura.peek() == std::ifstream::traits_type::eof();
     archivoLectura.close();
 
     // Si el archivo está vacío, agregamos el encabezado
-    if (archivoVacio) {
+    if (archivoVacio)
+    {
         std::ofstream archivoEscritura(ruta);
-        if (archivoEscritura.is_open()) {
+        if (archivoEscritura.is_open())
+        {
             archivoEscritura << "Algoritmo,Tamaño,Tiempo(s)\n";
             archivoEscritura.close();
-        } else {
+        }
+        else
+        {
             std::cerr << "No se pudo abrir el archivo para escribir el encabezado.\n";
         }
     }
 }
 
-void guardarResultadoEnArchivo(const std::vector<std::vector<long long>> &matriz, const std::string &nombreArchivo) {
+void guardarResultadoEnArchivo(const std::vector<std::vector<long long>>& matriz, const std::string& nombreArchivo)
+{
     // Crear el directorio para los resultados de matrices si no existe
     std::filesystem::create_directories("../src/data/results/matrices");
 
     std::ofstream archivo(nombreArchivo);
-    if (archivo.is_open()) {
-        for (const auto &fila : matriz) {
-            for (const auto &valor : fila) {
+    if (archivo.is_open())
+    {
+        for (const auto& fila : matriz)
+        {
+            for (const auto& valor : fila)
+            {
                 archivo << valor << " ";
             }
             archivo << "\n";
         }
         archivo.close();
-    } else {
+    }
+    else
+    {
         std::cerr << "No se pudo abrir el archivo para escribir el resultado de la matriz.\n";
     }
 }
 
-void ejecutarAlgoritmo(const std::string &algoritmo, const std::string &archivoA, const std::string &archivoB, int n) {
+void ejecutarAlgoritmo(const std::string& algoritmo, const std::string& archivoA, const std::string& archivoB, int n)
+{
     auto A = cargarMatriz(archivoA, n);
     auto B = cargarMatriz(archivoB, n);
 
     auto inicio = std::chrono::high_resolution_clock::now();
     std::vector<std::vector<long long>> resultado;
 
-    if (algoritmo == "Naiv") {
+    if (algoritmo == "Naiv")
+    {
         resultado = multiplicacionNaiv(A, B, n);
-    } else if (algoritmo == "LoopUnrollingTwo") {
+    }
+    else if (algoritmo == "LoopUnrollingTwo")
+    {
         resultado = NaivLoopUnrollingTwo(A, B);
-    } else if (algoritmo == "LoopUnrollingFour") {
+    }
+    else if (algoritmo == "LoopUnrollingFour")
+    {
         resultado = NaivLoopUnrollingFour(A, B);
-    } else if (algoritmo == "WinogradOriginal") {
+    }
+    else if (algoritmo == "WinogradOriginal")
+    {
         resultado = WinogradOriginal(A, B);
-    } else if (algoritmo == "WinogradScaled") {
+    }
+    else if (algoritmo == "WinogradScaled")
+    {
         resultado = WinogradScaled(A, B);
-    } else if (algoritmo == "III_3_SequentialBlock") {
+    }
+    else if (algoritmo == "III_3_SequentialBlock")
+    {
         resultado = III_3_SequentialBlock(A, B, 2);
-    } else if (algoritmo == "III_4_ParallelBlock") {
+    }
+    else if (algoritmo == "III_4_ParallelBlock")
+    {
         resultado = III_4_ParallelBlock(A, B, 2);
-    } else if (algoritmo == "IV_3_SequentialBlock") {
+    }
+    else if (algoritmo == "IV_3_SequentialBlock")
+    {
         resultado = IV_3_SequentialBlock(A, B, 2);
-    } else if (algoritmo == "IV_4_ParallelBlock") {
+    }
+    else if (algoritmo == "IV_4_ParallelBlock")
+    {
         resultado = IV_4_ParallelBlock(A, B, 2);
-    } else if (algoritmo == "IV_5_EnhancedParallelBlock") {
+    }
+    else if (algoritmo == "IV_5_EnhancedParallelBlock")
+    {
         resultado = IV_5_EnhancedParallelBlock(A, B, 2);
-    } else {
+    }
+    else
+    {
         std::cerr << "Algoritmo no reconocido: " << algoritmo << std::endl;
         return;
     }
@@ -322,13 +454,16 @@ void ejecutarAlgoritmo(const std::string &algoritmo, const std::string &archivoA
     registrarTiempo(algoritmo, n, tiempo.count());
 
     // Generar el nombre del archivo de resultado
-    std::string nombreArchivoResultado = "../src/data/results/matrices/resultado_" + algoritmo + "_n" + std::to_string(n) + ".txt";
+    std::string nombreArchivoResultado = "../src/data/results/matrices/resultado_" + algoritmo + "_n" +
+        std::to_string(n) + ".txt";
     guardarResultadoEnArchivo(resultado, nombreArchivoResultado);
 }
 
-int main() {
-    for(int i = 1; i < 9; i++) {
-        const int n = pow(2,i);  // Tamaño de la matriz (ajustable)
+int main()
+{
+    for (int i = 1; i < 9; i++)
+    {
+        const int n = pow(2, i); // Tamaño de la matriz (ajustable)
         const std::string archivoA = "../src/data/test_cases/matrizA" + std::to_string(n) + ".txt";
         const std::string archivoB = "../src/data/test_cases/matrizB" + std::to_string(n) + ".txt";
         std::string rutaCSV = "../src/data/results/times/resultadosC++_n" + std::to_string(n) + ".csv";
@@ -357,7 +492,8 @@ int main() {
         ejecutarAlgoritmo("IV_4_ParallelBlock", archivoA, archivoB, n);
         ejecutarAlgoritmo("IV_5_EnhancedParallelBlock", archivoA, archivoB, n);
 
-        std::cout << "Ejecucion de los algoritmos en C++ para tamano " << n << "*" << n << " completada\n";    }
+        std::cout << "Ejecucion de los algoritmos en C++ para tamano " << n << "*" << n << " completada\n";
+    }
 
     return 0;
 }
