@@ -6,9 +6,9 @@ def multiplicar_winograd_original(matriz1, matriz2, n):
     matriz2 = np.array(matriz2)
 
     # Inicializar las matrices de resultado y los factores
-    resultado = np.zeros((n, n))
-    row_factor = np.zeros(n)
-    col_factor = np.zeros(n)
+    resultado = np.zeros((n, n), dtype=int)  # Asegurarse de que el resultado sea de tipo entero
+    row_factor = np.zeros(n, dtype=int)      # Usar enteros para los factores de fila
+    col_factor = np.zeros(n, dtype=int)      # Usar enteros para los factores de columna
 
     # Calcular los factores de fila (row_factor)
     for i in range(n):
@@ -30,4 +30,6 @@ def multiplicar_winograd_original(matriz1, matriz2, n):
     if n % 2 == 1:
         resultado += matriz1[:, n-1, np.newaxis] * matriz2[n-1, :]
 
+    # Convertir el resultado a una lista de listas de enteros
     return resultado.tolist()
+

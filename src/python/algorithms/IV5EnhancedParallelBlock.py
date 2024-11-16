@@ -2,10 +2,10 @@ import numpy as np
 from concurrent.futures import ThreadPoolExecutor
 
 def multiplicar_iv5_enhanced_parallel_block(matriz1, matriz2, n, block_size=2):
-    # Convertir las matrices a NumPy arrays para operaciones rápidas
-    matriz1 = np.array(matriz1)
-    matriz2 = np.array(matriz2)
-    resultado = np.zeros((n, n))
+    # Convertir las matrices a NumPy arrays para operaciones rápidas, asegurando tipo entero
+    matriz1 = np.array(matriz1, dtype=int)  # Asegurarse de que la matriz sea de tipo entero
+    matriz2 = np.array(matriz2, dtype=int)  # Asegurarse de que la matriz sea de tipo entero
+    resultado = np.zeros((n, n), dtype=int)  # Asegurarse de que el resultado sea de tipo entero
 
     def calcular_bloque(ii, jj):
         """
@@ -27,5 +27,5 @@ def multiplicar_iv5_enhanced_parallel_block(matriz1, matriz2, n, block_size=2):
         for future in futures:
             future.result()
 
-    # Convertir el resultado a lista si se necesita salida en ese formato
+    # Convertir el resultado a lista de enteros si es necesario
     return resultado.tolist()

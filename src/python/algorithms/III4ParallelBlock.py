@@ -17,9 +17,9 @@ def multiplicar_iii4_parallel_block(matriz1, matriz2, n, block_size=2):
     Multiplica matrices usando bloques en paralelo, optimizado con NumPy.
     """
     # Convertir las matrices a NumPy
-    matriz1 = np.array(matriz1)
-    matriz2 = np.array(matriz2)
-    resultado = np.zeros((n, n))
+    matriz1 = np.array(matriz1, dtype=int)
+    matriz2 = np.array(matriz2, dtype=int)
+    resultado = np.zeros((n, n), dtype=int)
 
     # Crear el grupo de procesos
     with Pool() as pool:

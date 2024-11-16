@@ -6,15 +6,15 @@ def multiplicar_naiv_loop_unrolling_four(matriz1, matriz2, n):
         for j in range(n):
             suma = 0
 
-            # Procesar bloques de 4 elementos
-            for k in range(0, n // 4 * 4, 4):
+            # Procesar bloques de 4 elementos (loop unrolling)
+            for k in range(0, n - 3, 4):  # Asegurarnos de no sobrepasar los índices
                 suma += (matriz1[i][k] * matriz2[k][j] +
                          matriz1[i][k + 1] * matriz2[k + 1][j] +
                          matriz1[i][k + 2] * matriz2[k + 2][j] +
                          matriz1[i][k + 3] * matriz2[k + 3][j])
 
-            # Manejar los elementos restantes
-            for k in range(n // 4 * 4, n):
+            # Manejar los elementos restantes (cuando n no es múltiplo de 4)
+            for k in range(n - (n % 4), n):
                 suma += matriz1[i][k] * matriz2[k][j]
 
             resultado[i][j] = suma
