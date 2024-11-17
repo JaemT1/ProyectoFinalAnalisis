@@ -9,7 +9,7 @@ from src.python.algorithms.NaivOnArray import multiplicar_naiv
 from src.python.algorithms.NaivLoopUnrollingTwo import multiplicar_naiv_loop_unrolling_two
 from src.python.algorithms.NaivLoopUnrollingFour import multiplicar_naiv_loop_unrolling_four
 from src.python.algorithms.WinogradOriginal import multiplicar_winograd_original
-from src.python.algorithms.WinogradScaled import multiplicar_winograd_escalado
+from src.python.algorithms.Strassen import strassen
 from src.python.algorithms.III3SequentialBlock import multiplicar_iii3_sequential_block
 from src.python.algorithms.III4ParallelBlock import multiplicar_iii4_parallel_block
 from src.python.algorithms.IV3SequentialBlock import multiplicar_iv3_sequential_block
@@ -41,7 +41,7 @@ def main():
             'LoopUnrollingTwo': multiplicar_naiv_loop_unrolling_two,
             'LoopUnrollingFour': multiplicar_naiv_loop_unrolling_four,
             'WinogradOriginal': multiplicar_winograd_original,
-            'WinogradScaled': multiplicar_winograd_escalado,
+            'Strassen': strassen,
             'III_3_SequentialBlock': multiplicar_iii3_sequential_block,
             'III_4_ParallelBlock': lambda m1, m2, n: multiplicar_iii4_parallel_block(m1, m2, n, 64),
             'IV_3_SequentialBlock': multiplicar_iv3_sequential_block,
@@ -50,6 +50,14 @@ def main():
         }
 
         for nombre, funcion in algoritmos.items():
+            if nombre == 'Strassen':
+                tiempo, _ = medir_tiempo(funcion, matriz1_cargada, matriz2_cargada)
+                resultados.append({
+                    'Algoritmo': nombre,
+                    'Tamaño': n,
+                    'Tiempo(s)': tiempo
+                })
+                continue
             tiempo, _ = medir_tiempo(funcion, matriz1_cargada, matriz2_cargada, n)
             resultados.append({
                 'Algoritmo': nombre,
@@ -69,6 +77,7 @@ def main():
         df_resultados = pd.DataFrame(resultados)
         df_resultados.to_csv(filepath, index=False)
         print(f"Ejecución de los algoritmos en Python para tamaño {2**i}*{2**i} completada\n")
+
 
 
 if __name__ == "__main__":

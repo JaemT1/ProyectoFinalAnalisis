@@ -8,7 +8,8 @@
 #include <thread>
 #include <filesystem>
 #include <algorithm>
-#include <omp.h>
+#include <cmath>
+#include <climits>
 
 using Matrix = std::vector<std::vector<long long>>;
 using namespace std;
@@ -66,55 +67,135 @@ Matrix NaivLoopUnrollingFour(const Matrix& A, const Matrix& B)
     return C;
 }
 
-Matrix WinogradOriginal(const Matrix& A, const Matrix& B)
-{
+#include <vector>
+
+using Matrix = std::vector<std::vector<long long>>;
+
+// Implementación de WinogradOriginal manteniendo la lógica original
+Matrix WinogradOriginal(const Matrix& A, const Matrix& B) {
+    int N = A.size();  // Asumimos que A y B son matrices cuadradas de tamaño N x N
+    Matrix Result(N, std::vector<long long>(N, 0));
+    std::vector<long long> y(N, 0), z(N, 0);
+    long long aux;
+
+    // Calcular el vector y (suma auxiliar para las filas de A)
+    for (int i = 0; i < N; i++) {
+        aux = 0;
+        for (int j = 0; j < N - 1; j += 2) {
+            aux += A[i][j] * A[i][j + 1];
+        }
+        y[i] = aux;
+    }
+
+    // Calcular el vector z (suma auxiliar para las columnas de B)
+    for (int i = 0; i < N; i++) {
+        aux = 0;
+        for (int j = 0; j < N - 1; j += 2) {
+            aux += B[j][i] * B[j + 1][i];
+        }
+        z[i] = aux;
+    }
+
+    // Calcular la matriz Result usando los factores auxiliares y, z
+    for (int i = 0; i < N; i++) {
+        for (int k = 0; k < N; k++) {
+            aux = 0;
+            for (int j = 0; j < N - 1; j += 2) {
+                aux += (A[i][j] + B[j + 1][k]) * (A[i][j + 1] + B[j][k]);
+            }
+            Result[i][k] = aux - y[i] - z[k];
+
+            // Si N es impar, se necesita un ajuste adicional
+            if (N % 2 == 1) {
+                Result[i][k] += A[i][N - 1] * B[N - 1][k];
+            }
+        }
+    }
+
+    return Result;
+}
+
+// Función para sumar dos matrices
+Matrix add(const Matrix& A, const Matrix& B) {
     int n = A.size();
     Matrix C(n, std::vector<long long>(n, 0));
-    std::vector<long long> rowFactor(n, 0), colFactor(n, 0);
-
-    for (int i = 0; i < n; i++)
-        for (int j = 0; j < n / 2; j++)
-            rowFactor[i] += A[i][2 * j] * A[i][2 * j + 1];
-
-    for (int i = 0; i < n; i++)
-        for (int j = 0; j < n / 2; j++)
-            colFactor[i] += B[2 * j][i] * B[2 * j + 1][i];
-
-    for (int i = 0; i < n; i++)
-        for (int j = 0; j < n; j++)
-        {
-            C[i][j] = -rowFactor[i] - colFactor[j];
-            for (int k = 0; k < n / 2; k++)
-                C[i][j] += (A[i][2 * k] + B[2 * k + 1][j]) * (A[i][2 * k + 1] + B[2 * k][j]);
-            if (n % 2 == 1)
-                C[i][j] += A[i][n - 1] * B[n - 1][j];
-        }
+    for (int i = 0; i < n; ++i)
+        for (int j = 0; j < n; ++j)
+            C[i][j] = A[i][j] + B[i][j];
     return C;
 }
 
-Matrix WinogradScaled(const Matrix& A, const Matrix& B)
-{
+// Función para restar dos matrices
+Matrix subtract(const Matrix& A, const Matrix& B) {
     int n = A.size();
     Matrix C(n, std::vector<long long>(n, 0));
-    std::vector<long long> rowFactor(n, 0), colFactor(n, 0);
+    for (int i = 0; i < n; ++i)
+        for (int j = 0; j < n; ++j)
+            C[i][j] = A[i][j] - B[i][j];
+    return C;
+}
 
-    for (int i = 0; i < n; i++)
-        for (int j = 0; j < n / 2; j++)
-            rowFactor[i] += A[i][2 * j] * A[i][2 * j + 1];
+// Algoritmo de Strassen
+Matrix Strassen(const Matrix& A, const Matrix& B) {
+    int n = A.size();
+    if (n == 1) {
+        return {{A[0][0] * B[0][0]}};
+    }
 
-    for (int i = 0; i < n; i++)
-        for (int j = 0; j < n / 2; j++)
-            colFactor[i] += B[2 * j][i] * B[2 * j + 1][i];
+    int newSize = n / 2;
 
-    for (int i = 0; i < n; i++)
-        for (int j = 0; j < n; j++)
-        {
-            C[i][j] = -rowFactor[i] - colFactor[j];
-            for (int k = 0; k < n / 2; k++)
-                C[i][j] += (A[i][2 * k] + B[2 * k + 1][j]) * (A[i][2 * k + 1] + B[2 * k][j]);
-            if (n % 2 == 1)
-                C[i][j] += A[i][n - 1] * B[n - 1][j];
+    // Crear submatrices
+    Matrix A11(newSize, std::vector<long long>(newSize));
+    Matrix A12(newSize, std::vector<long long>(newSize));
+    Matrix A21(newSize, std::vector<long long>(newSize));
+    Matrix A22(newSize, std::vector<long long>(newSize));
+
+    Matrix B11(newSize, std::vector<long long>(newSize));
+    Matrix B12(newSize, std::vector<long long>(newSize));
+    Matrix B21(newSize, std::vector<long long>(newSize));
+    Matrix B22(newSize, std::vector<long long>(newSize));
+
+    // Dividir matrices A y B en submatrices
+    for (int i = 0; i < newSize; i++) {
+        for (int j = 0; j < newSize; j++) {
+            A11[i][j] = A[i][j];
+            A12[i][j] = A[i][j + newSize];
+            A21[i][j] = A[i + newSize][j];
+            A22[i][j] = A[i + newSize][j + newSize];
+
+            B11[i][j] = B[i][j];
+            B12[i][j] = B[i][j + newSize];
+            B21[i][j] = B[i + newSize][j];
+            B22[i][j] = B[i + newSize][j + newSize];
         }
+    }
+
+    // Calcular los productos intermedios de Strassen
+    Matrix M1 = Strassen(add(A11, A22), add(B11, B22));
+    Matrix M2 = Strassen(add(A21, A22), B11);
+    Matrix M3 = Strassen(A11, subtract(B12, B22));
+    Matrix M4 = Strassen(A22, subtract(B21, B11));
+    Matrix M5 = Strassen(add(A11, A12), B22);
+    Matrix M6 = Strassen(subtract(A21, A11), add(B11, B12));
+    Matrix M7 = Strassen(subtract(A12, A22), add(B21, B22));
+
+    // Combinar los productos intermedios para obtener las submatrices de C
+    Matrix C11 = add(subtract(add(M1, M4), M5), M7);
+    Matrix C12 = add(M3, M5);
+    Matrix C21 = add(M2, M4);
+    Matrix C22 = add(subtract(add(M1, M3), M2), M6);
+
+    // Combinar submatrices en la matriz resultado
+    Matrix C(n, std::vector<long long>(n));
+    for (int i = 0; i < newSize; i++) {
+        for (int j = 0; j < newSize; j++) {
+            C[i][j] = C11[i][j];
+            C[i][j + newSize] = C12[i][j];
+            C[i + newSize][j] = C21[i][j];
+            C[i + newSize][j + newSize] = C22[i][j];
+        }
+    }
+
     return C;
 }
 
@@ -370,14 +451,40 @@ void agregarEncabezadoSiEsNecesario(const std::string& ruta)
     }
 }
 
+// Función auxiliar para extraer el algoritmo del nombre del archivo
+std::string extraerAlgoritmo(const std::string& nombreArchivo)
+{
+    // Buscar la posición de "resultado_" y "_n"
+    size_t inicio = nombreArchivo.find("resultado_") + 10; // Longitud de "resultado_"
+    size_t fin = nombreArchivo.find("_n");
+
+    // Extraer la parte que corresponde al algoritmo
+    if (inicio != std::string::npos && fin != std::string::npos && fin > inicio) {
+        return nombreArchivo.substr(inicio, fin - inicio);
+    }
+
+    // Si no se encuentra el formato esperado, devolver un identificador genérico
+    return "Desconocido";
+}
+
+// Función para guardar resultados en la carpeta correspondiente al algoritmo
 void guardarResultadoEnArchivo(const std::vector<std::vector<long long>>& matriz, const std::string& nombreArchivo)
 {
-    // Crear el directorio para los resultados de matrices si no existe
-    std::filesystem::create_directories("../src/data/results/matrices");
+    // Extraer el algoritmo del nombre del archivo
+    std::string algoritmo = extraerAlgoritmo(nombreArchivo);
 
-    std::ofstream archivo(nombreArchivo);
+    // Crear el directorio específico para el algoritmo si no existe
+    std::string rutaDirectorio = "../src/data/results/matrices/" + algoritmo;
+    std::filesystem::create_directories(rutaDirectorio);
+
+    // Generar la ruta completa del archivo dentro del directorio del algoritmo
+    std::string rutaArchivo = rutaDirectorio + "/" + nombreArchivo.substr(nombreArchivo.find_last_of("/\\") + 1);
+
+    // Abrir archivo en modo sobrescritura
+    std::ofstream archivo(rutaArchivo, std::ios::out | std::ios::trunc);
     if (archivo.is_open())
     {
+        // Escribir la matriz en el archivo
         for (const auto& fila : matriz)
         {
             for (const auto& valor : fila)
@@ -386,10 +493,11 @@ void guardarResultadoEnArchivo(const std::vector<std::vector<long long>>& matriz
             }
             archivo << "\n";
         }
-        archivo.close();
+        archivo.close(); // Cerrar el archivo después de escribir
     }
     else
     {
+        // Mensaje de error si no se puede abrir el archivo
         std::cerr << "No se pudo abrir el archivo para escribir el resultado de la matriz.\n";
     }
 }
@@ -418,9 +526,9 @@ void ejecutarAlgoritmo(const std::string& algoritmo, const std::string& archivoA
     {
         resultado = WinogradOriginal(A, B);
     }
-    else if (algoritmo == "WinogradScaled")
+    else if (algoritmo == "Strassen")
     {
-        resultado = WinogradScaled(A, B);
+        resultado = Strassen(A, B);
     }
     else if (algoritmo == "III_3_SequentialBlock")
     {
@@ -485,7 +593,7 @@ int main()
         ejecutarAlgoritmo("LoopUnrollingTwo", archivoA, archivoB, n);
         ejecutarAlgoritmo("LoopUnrollingFour", archivoA, archivoB, n);
         ejecutarAlgoritmo("WinogradOriginal", archivoA, archivoB, n);
-        ejecutarAlgoritmo("WinogradScaled", archivoA, archivoB, n);
+        ejecutarAlgoritmo("Strassen", archivoA, archivoB,n);
         ejecutarAlgoritmo("III_3_SequentialBlock", archivoA, archivoB, n);
         ejecutarAlgoritmo("III_4_ParallelBlock", archivoA, archivoB, n);
         ejecutarAlgoritmo("IV_3_SequentialBlock", archivoA, archivoB, n);
